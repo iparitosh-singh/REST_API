@@ -9,7 +9,7 @@ import { generateAccessToken , generateRefreshToken } from '../authUtil/tokenGen
 
 const userAuthController = express.Router()
 
-let refreshtokens = []
+let refreshtokens = {}
 
 /*POST
  * add a new user to the database
@@ -54,7 +54,9 @@ userAuthController.post('/login', (req, res) => {
     User.findOne({email})
     .then(user =>{
         if(!user){
-            res.sendStatus(404)
+            res.status(404).send({
+                message: "No user found"
+            })
         }
         user.comparePassword(password)
         .then(same =>{
@@ -68,7 +70,7 @@ userAuthController.post('/login', (req, res) => {
             }
             const accessToken = generateAccessToken(userData)
             const refreshToken = generateRefreshToken(userData)
-            refreshtokens.push(refreshToken)
+            refreshtokens[refreshToken] = userData
             res.send({
                 message: "Auth Succesful",
                 refreshToken,
@@ -82,7 +84,7 @@ userAuthController.post('/login', (req, res) => {
         })
     })
     .catch(err => {
-        res.status(400).json({ error: err })
+        res.status(400).status({ error: err })
     })
 })
 
@@ -90,7 +92,7 @@ userAuthController.post('/login', (req, res) => {
 userAuthController.post('/token', (req, res) =>{
     const key = getRefreshKey()
     const { refreshToken } = req.body
-    if(!refreshtokens.includes(refreshToken)) res.sendStatus(403)
+    if(!(refreshToken in refreshtokens)) res.sendStatus(403)
     const user = jwt.verify(refreshToken, key)
     const userData = {
         username: user.username,
@@ -107,8 +109,11 @@ userAuthController.post('/token', (req, res) =>{
  */
 //logout
 userAuthController.delete('/logout', (req, res) => {
-    refreshtokens.filter(token => {token != req.body.refreshToken})
-    res.sendStatus(200)
+    const { refreshToken } = req.body
+    if(refreshToken in refreshtokens) {
+        delete refreshtokens[refreshToken]
+    }
+    res.sendStatus(204)
 })
 
 // exporting the contoller

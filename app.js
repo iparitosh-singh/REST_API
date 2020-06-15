@@ -1,10 +1,7 @@
 import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
-import {
-    userController
-} from './controller'
-
+import { Router } from  './controller'
 
 const app =  express()
 
@@ -14,7 +11,7 @@ app.use(cors())
 
 const port = process.env.port || 4000
 
-app.use('/api', userController)
+app.use('/api', Router)
 
 app.listen(port, () =>{
     console.log(`Now listening on port ${port}`)

@@ -2,23 +2,23 @@ import express from 'express'
 import {
     User
 } from '../database/models'
-import check_auth from '../authUtil/check_auth'
+import checkAuth from '../authUtil/check_auth'
 
 const userController = express.Router()
 
 /* GET
  * all the users in the User model
  */
-userController.get('/users', (req, res) =>{
+userController.get('/', (req, res) =>{
     User.find({})
     .then(users =>{
-        res.stutus(200).json({
+        res.status(200).json({
             users,
         })
     })
 })
 
-userController.get('/user/profile', check_auth, (req, res) =>{
+userController.get('/user/profile', checkAuth, (req, res) =>{
     let id = req.body.id
     User.findById(id)
     .then((user) =>{
@@ -29,7 +29,7 @@ userController.get('/user/profile', check_auth, (req, res) =>{
 /*PUT
  * to edit the data of the current user
  */
-userController.put('/edit-user', check_auth, (req, res) =>{
+userController.put('/edit-user', checkAuth, (req, res) =>{
     let id = req.userData._id
     User.findByIdAndUpdate(id, {username: req.body.username })
     .then(user =>{
