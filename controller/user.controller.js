@@ -1,66 +1,72 @@
 import express from 'express'
-const userController = express.Router()
 import {
     User
 } from '../database/models'
-import sha256 from 'sha256'
+import check_auth from '../authUtil/check_auth'
+
+const userController = express.Router()
 
 /* GET
  * all the users in the User model
  */
 userController.get('/users', (req, res) =>{
-    User.find({} , (err , result) => {
-        res.status(200).json({
-            data: result
+    User.find({})
+    .then(users =>{
+        res.stutus(200).json({
+            users,
         })
     })
 })
 
-userController.get('/user/:id', (req, res) =>{
-    let id = req.param.id
-    User.findById({_id: req.params.id})
+userController.get('/user/profile', check_auth, (req, res) =>{
+    let id = req.body.id
+    User.findById(id)
     .then((user) =>{
         res.send(user)
     })
 })
 
-
-/*POST
- * add a new user to the database
+/*PUT
+ * to edit the data of the current user
  */
-userController.post('/add-user', (req, res) =>{
-    const {email, password, username} = req.body
-    const UserData = {
-        email,
-        username,
-        hashedPassword: sha256(password)
-    }
-    const newUser = new User(UserData)
-    newUser
-        .save()
-        .then(data => {
-            res.status(200).send(data)
+userController.put('/edit-user', check_auth, (req, res) =>{
+    let id = req.userData._id
+    User.findByIdAndUpdate(id, {username: req.body.username })
+    .then(user =>{
+        let newUser = {}
+        User.findById(user._id)
+        .then(newuser =>{
+            newUser = newuser
+            res.status(201).json({
+                modified: newUser,
+                old: user
+            })
         })
         .catch(err => {
-            res.status(400).send({ error : err, message : "Unable to save to database"})
-        })
-})
-/*PUT
- * to update the values of user
- */
-userController.put('/edit-user/:id', (req, res) => {
-    User.findByIdAndUpdate(req.params.id, req.body)
-    .then((data) => {
-        User.findById(req.params.id)
-        .then((updatedUser) =>{
-            res.send({
-                updated: updatedUser,
-                old: data
+            res.status(500).json({
+                error: err
             })
         })
     })
-    .catch((err => { res.send(err)}))
 })
 
-// exporting the contoller
+/*DELETE
+ * to delete the user
+ */
+userController.delete('/user_delete/:id', (req, res) => {
+    User.findByIdAndDelete(req.params.id)
+    .then(data =>{
+        res.status(200).json({
+            user: data,
+            message: 'User deleted'
+        })
+    })
+    .catch(err =>{
+        res.status(500).json({
+            error: err
+        })
+    })
+})
+
 export default userController
+

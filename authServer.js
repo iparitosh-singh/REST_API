@@ -2,7 +2,7 @@ import express from 'express'
 import mongoose from 'mongoose'
 import cors from 'cors'
 import {
-    userController
+    userAuthController
 } from './controller'
 
 
@@ -12,12 +12,12 @@ app.use(express.json())
 app.use(express.urlencoded({extended: false }))
 app.use(cors())
 
-const port = process.env.port || 4000
+const port = 3000
 
-app.use('/api', userController)
+app.use('/auth', userAuthController)
 
 app.listen(port, () =>{
-    console.log(`Now listening on port ${port}`)
+    console.log(`Auth server started on port:${port}`)
     mongoose.connect('mongodb://localhost/Tictactoe',
         {
             useNewUrlParser: true,
@@ -30,4 +30,6 @@ app.listen(port, () =>{
             console.log(err)
         })
 })
+
+
 

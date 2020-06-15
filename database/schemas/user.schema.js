@@ -1,6 +1,6 @@
 import { Schema } from 'mongoose'
 import uniqueValidator from 'mongoose-unique-validator'
-import sha256 from 'sha256'
+import bcrypt from 'bcrypt'
 
 const UserSchema = new Schema({
     hashedPassword: {
@@ -11,7 +11,9 @@ const UserSchema = new Schema({
         type: String,
         required: [true , "can't be blank"],
         index: true,
-        unique: true
+        unique: true,
+        match: /(?!^[.+&'_-]*@.*$)(^[_\w\d+&'-]+(\.[_\w\d+&'-]*)*@[\w\d-]+(\.[\w\d-]+)*\.(([\d]{1,3})|([\w]{2,}))$)/
+
     },
     username: {
         type: String,
@@ -22,9 +24,18 @@ const UserSchema = new Schema({
     }
 })
 
-UserSchema.methods.comparePassword = (password) =>{
-    return this.hashedPassword === sha256(password)
+UserSchema.methods.comparePassword = function(password){
+    return new Promise((resolve, reject) => {
+        bcrypt.compare(password, this.hashedPassword, (err, same) => {
+            if(err){
+                reject(err)
+            } else {
+                resolve(same)
+            }
+        })
+    })
 }
+
 UserSchema.plugin(uniqueValidator, {message: "is already taken"})
 
 export default UserSchema
