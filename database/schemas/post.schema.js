@@ -20,17 +20,21 @@ const PostSchema = new Schema ({
         type: Date,
         default: Date.now
     },
-    comments: {
-        type: String,
-        created: {
-            type: Date,
-            default : Date.now
-        },
-        postedBy: {
+    postedBy: {
             type: Schema.Types.ObjectId,
             ref: 'User',
+    },
+    comments: [{
+        text: String,
+        postedBy: {
+            type: Schema.Types.ObjectId,
+            ref: 'User'
+        },
+        dateCreated: {
+            type: Date,
+            default: Date.now()
         }
-    }
+    }]
 })
 
 export default PostSchema

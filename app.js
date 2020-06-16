@@ -14,7 +14,7 @@ const port = process.env.port || 4000
 app.use('/api', Router)
 
 app.listen(port, () =>{
-    console.log(`Now listening on port ${port}`)
+    console.log(`Now listening on port:${port}`)
     mongoose.connect('mongodb://localhost/Tictactoe',
         {
             useNewUrlParser: true,

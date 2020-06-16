@@ -34,9 +34,8 @@ postController.get('/yourpost', checkAuth, (req, res) =>{
 })
 
 /* POST
- * make a post
+ * make a post and comments
  */
-
 postController.post('/add-post', checkAuth, (req, res) =>{
     const { title, text, photo } = req.body
     let post = {
@@ -59,6 +58,29 @@ postController.post('/add-post', checkAuth, (req, res) =>{
         .catch(err => {
             res.status(500).send(err)
         })
+})
+
+postController.post('/add-comment', checkAuth, (req, res) =>{
+    const { postId } = req.body
+    const comment = {
+        text: req.body.text,
+        postedBy: req.userData._id
+    }
+    Post.findOne({_id: postId })
+    .then(post =>{
+        if(!post){
+            res.status(404).send({
+                message: "No post found"
+            })
+        }
+        post.comments.push(comment)
+        post.save()
+        .then(updatedPost => {
+            res.status(201).send({
+                comments: updatedPost.comments
+            })
+        })
+    })
 })
 
 export default postController
