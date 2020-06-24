@@ -12,10 +12,13 @@ app.use(express.json())
 app.use(express.urlencoded({extended: false }))
 app.use(cors())
 
-const port = 3000
+const port = 6969
 
 app.use('/auth', userAuthController)
 
+app.use((err, req, res, next) => {
+
+})
 app.listen(port, () =>{
     console.log(`Auth server started on port:${port}`)
     mongoose.connect('mongodb://localhost/Tictactoe',

@@ -1,7 +1,7 @@
+import cors from 'cors'
 import express from 'express'
 import mongoose from 'mongoose'
-import cors from 'cors'
-import { Router } from  './controller'
+import {Router} from './controller'
 
 const app =  express()
 

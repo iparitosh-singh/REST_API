@@ -19,9 +19,7 @@ userAuthController.post('/signup', (req, res) =>{
     const {email, password, username} = req.body
     bcrypt.hash(password, 10, (err, pass) =>{
         if(err){
-            res.status(500).json({
-                error : err
-            })
+            res.status(500).send(err)
         }
         else{
             const UserData = {
@@ -41,7 +39,7 @@ userAuthController.post('/signup', (req, res) =>{
                     })
                 })
                 .catch(err => {
-                    res.status(500).json(err)
+                    res.status(500).send(err)
                 })
         }
     })
@@ -54,14 +52,12 @@ userAuthController.post('/login', (req, res) => {
     User.findOne({email})
     .then(user =>{
         if(!user){
-            res.status(404).send({
-                message: "No user found"
-            })
+            res.status(401).send('No user found')
         }
         user.comparePassword(password)
         .then(same =>{
             if(!same){
-                res.sendStatus(401)
+                res.status(401).send('passoword do not match')
             }
             const userData = {
                 _id: user._id,
@@ -72,19 +68,16 @@ userAuthController.post('/login', (req, res) => {
             const refreshToken = generateRefreshToken(userData)
             refreshtokens[refreshToken] = userData
             res.send({
-                message: "Auth Succesful",
                 refreshToken,
                 accessToken
             })
         })
         .catch(err => {
-            res.status(401).json({
-                error: err
-            })
+            res.status(401).send(err)
         })
     })
     .catch(err => {
-        res.status(400).status({ error: err })
+        res.status(400).send(err)
     })
 })
 
